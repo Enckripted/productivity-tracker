@@ -1,34 +1,60 @@
-import { ref } from "vue"
+import { ref, type Ref } from 'vue'
 
-import useHelperFunctions from "./helper"
+import useHelperFunctions from './helper'
+import type { Task } from '@/types/shared.types'
 
 const { currentTime, onSameDay, secsBetweenDates, getNextDay } = useHelperFunctions()
 
-const tasks = ref([])
+const tasks: Ref<Array<Task>> = ref([])
+const dailyTasks: Ref<Array<Task>> = ref([])
 
-const dailyTasks = ref([])
-const workdayStart = ref("")
-const workdayStopped = ref(true)
+const workdayStart: Ref<Date> = ref(new Date())
+const workdayStopped: Ref<boolean> = ref(true)
 
-const workingTask = ref("")
-const workingStart = ref("")
+const workingTask: Ref<string> = ref('')
+const workingStart: Ref<Date> = ref(new Date())
 
-function findTask(taskName) {
-	return tasks.value.find((task) => task.name == taskName)
+interface LocalStorageSave {
+	tasks: Array<Task>
+	dailyTasks: Array<Task>
+	workdayStart: string
+	workdayStopped: boolean
+	workingTask: string
+	workingStart: string
 }
 
-function findDailyTask(taskName) {
-	return dailyTasks.value.find((task) => task.name == taskName)
+function taskExists(taskName: string) {
+	if (tasks.value.find((task) => task.name === taskName)) return true
+	return false
 }
 
-function addSecsToTask(name, secs) {
+function dailyTaskExists(taskName: string) {
+	if (dailyTasks.value.find((task) => task.name === taskName)) return true
+	return false
+}
+
+function findTask(taskName: string) {
+	const res = tasks.value.find((task) => task.name === taskName)
+	if (!res) throw new Error('Could not find daily task with name ' + taskName)
+	return res
+}
+
+function findDailyTask(taskName: string) {
+	const res = dailyTasks.value.find((task) => task.name === taskName)
+	if (!res) throw new Error('Could not find daily task with name ' + taskName)
+	return res
+}
+
+function addSecsToTask(name: string, secs: number) {
 	findTask(name).secondsSpent += secs
 	findDailyTask(name).secondsSpent += secs
 }
 
-function secsWorkedOn(timeStart, timeEnd) {
+function secsWorkedOn(timeStart: Date, timeEnd: Date) {
 	if (timeEnd < timeStart)
-		console.error("secsWorkedOn failed with timeStart of", timeStart, "and timeEnd of", timeEnd)
+		throw new Error(
+			'secsWorkedOn failed with timeStart of ' + timeStart + ' and timeEnd of ' + timeEnd,
+		)
 
 	if (onSameDay(timeStart, timeEnd)) {
 		return secsBetweenDates(timeStart, timeEnd)
@@ -39,44 +65,47 @@ function secsWorkedOn(timeStart, timeEnd) {
 }
 
 function saveToLocalStorage() {
-	localStorage.setItem(
-		"save",
-		JSON.stringify({
-			tasks: tasks.value,
+	const save: LocalStorageSave = {
+		tasks: tasks.value,
+		dailyTasks: dailyTasks.value,
 
-			dailyTasks: dailyTasks.value,
-			workdayStart: workdayStart.value,
-			workdayStopped: workdayStopped.value,
+		workdayStart: workdayStart.value.toString(),
+		workdayStopped: workdayStopped.value,
 
-			workingTask: workingTask.value,
-			workingStart: workingStart.value,
-		}),
-	)
-	console.log("saved with", JSON.parse(localStorage.getItem("save")))
+		workingTask: workingTask.value,
+		workingStart: workingStart.value.toString(),
+	}
+	localStorage.setItem('save', JSON.stringify(save))
+	console.log('saved with', save)
 }
 
 function loadFromLocalStorage() {
-	const data = localStorage.getItem("save")
+	const data = localStorage.getItem('save')
 	if (!data) return false
-	const save = JSON.parse(data)
-	console.log("found", save)
 
+	const save: LocalStorageSave = JSON.parse(data)
+	console.log('found', save)
+
+	//reset app state back to how it was saved
 	tasks.value = save.tasks
 	dailyTasks.value = save.dailyTasks
 
-	if (save.workingStart) {
-		addSecsToTask(save.workingTask, secsWorkedOn(new Date(save.workingStart), currentTime()))
-		setWorkingTask(save.workingTask)
-	}
 	workdayStart.value = new Date(save.workdayStart)
 	workdayStopped.value = save.workdayStopped
-	//note if save.workingStart is an empty string, this condition will become false and will work fine anyways
-	if (!onSameDay(new Date(save.workingStart), currentTime())) stopWorkday()
+
+	workingStart.value = new Date(save.workingStart)
+	workingTask.value = save.workingTask
+
+	if (!save.workdayStopped) {
+		setWorkingTask(save.workingTask)
+		if (!onSameDay(workingStart.value, currentTime())) stopWorkday()
+	}
+
 	return true
 }
 
-function createTask(name, color) {
-	if (findTask(name)) return
+function createTask(name: string, color: string) {
+	if (taskExists(name)) return
 	tasks.value.push({
 		name: name,
 		color: color,
@@ -87,30 +116,30 @@ function createTask(name, color) {
 	saveToLocalStorage()
 }
 
-function updateTask(name, color) {
+function updateTask(name: string, color: string) {
 	const selected = findTask(name)
 
 	selected.name = name
 	selected.color = color
-	if (workingTask.value == selected.name) setWorkingTask(name)
+	if (workingTask.value === selected.name) setWorkingTask(name)
 
 	saveToLocalStorage()
 }
 
-function deleteTask(name) {
-	if (workingTask.value == name) setWorkingTask("Idling")
-	tasks.value = tasks.value.map((task) => task.name != name)
+function deleteTask(name: string) {
+	if (workingTask.value === name) setWorkingTask('Idling')
+	tasks.value = tasks.value.filter((task) => task.name !== name)
 
 	saveToLocalStorage()
 }
 
-function setWorkingTask(name) {
+function setWorkingTask(name: string) {
 	if (!workdayStopped.value)
 		addSecsToTask(workingTask.value, secsWorkedOn(workingStart.value, currentTime()))
 
 	workingTask.value = name
 	workingStart.value = currentTime()
-	if (!findDailyTask(name)) {
+	if (!dailyTaskExists(name)) {
 		dailyTasks.value.push({
 			name: name,
 			color: findTask(workingTask.value).color,
@@ -126,17 +155,17 @@ function removeWorkingTask() {
 	if (!workdayStopped.value)
 		addSecsToTask(workingTask.value, secsWorkedOn(workingStart.value, currentTime()))
 
-	workingTask.value = ""
-	workingStart.value = ""
+	workingTask.value = ''
+	workingStart.value = new Date()
 
 	saveToLocalStorage()
 }
 
 function startWorkday() {
-	setWorkingTask("Idling")
+	setWorkingTask('Idling')
 	workdayStopped.value = false
 
-	if (dailyTasks.value[0].secondsSpent == 0) {
+	if (dailyTasks.value[0].secondsSpent === 0) {
 		workdayStart.value = currentTime()
 	}
 
@@ -149,11 +178,11 @@ function stopWorkday() {
 
 	if (!onSameDay(workdayStart.value, currentTime())) {
 		console.log(
-			"detected the current time to be the day ahead of",
+			'detected the current time to be the day ahead of',
 			workdayStart.value,
-			"wiping daily",
+			'wiping daily',
 		)
-		workdayStart.value = ""
+		workdayStart.value = new Date()
 		dailyTasks.value = []
 	}
 
@@ -162,7 +191,7 @@ function stopWorkday() {
 
 window.onload = () => {
 	if (!loadFromLocalStorage()) {
-		createTask("Idling", "#008FFF")
+		createTask('Idling', '#008FFF')
 	}
 	setInterval(() => {
 		if (workdayStopped.value) return

@@ -1,13 +1,13 @@
-import { createRouter, createWebHistory } from "vue-router"
-import useSupabaseAuth from "@/composables/supabaseAuth"
+import { createRouter, createWebHistory } from 'vue-router'
+import useSupabaseAuth from '@/composables/supabaseAuth'
 
-import LoginView from "@/views/auth/LoginView.vue"
-import SignupView from "@/views/auth/SignupView.vue"
-import ForgotPasswordView from "@/views/auth/ForgotPasswordView.vue"
-import UpdatePasswordView from "@/views/auth/UpdatePasswordView.vue"
+import LoginView from '@/views/auth/LoginView.vue'
+import SignupView from '@/views/auth/SignupView.vue'
+import ForgotPasswordView from '@/views/auth/ForgotPasswordView.vue'
+import UpdatePasswordView from '@/views/auth/UpdatePasswordView.vue'
 
-import MainGate from "@/views/MainGate.vue"
-import NotFoundView from "@/views/NotFoundView.vue"
+import MainGate from '@/views/MainGate.vue'
+import NotFoundView from '@/views/NotFoundView.vue'
 
 const supabaseAuth = useSupabaseAuth()
 
@@ -15,34 +15,34 @@ const router = createRouter({
 	history: createWebHistory(import.meta.env.BASE_URL),
 	routes: [
 		{
-			path: "/",
-			name: "home",
+			path: '/',
+			name: 'home',
 			component: MainGate,
 		},
 		{
-			path: "/login",
-			name: "login",
+			path: '/login',
+			name: 'login',
 			component: LoginView,
 		},
 		{
-			path: "/signup",
-			name: "signup",
+			path: '/signup',
+			name: 'signup',
 			component: SignupView,
 		},
 		{
-			path: "/forgotpassword",
-			name: "forgotpassword",
+			path: '/forgotpassword',
+			name: 'forgotpassword',
 			component: ForgotPasswordView,
 		},
 		{
-			path: "/updatepassword",
-			name: "/updatepassword",
+			path: '/updatepassword',
+			name: '/updatepassword',
 			component: UpdatePasswordView,
 		},
 
 		{
-			path: "/:pathMatch(.*)*",
-			name: "notfound",
+			path: '/:pathMatch(.*)*',
+			name: 'notfound',
 			component: NotFoundView,
 		},
 	],
@@ -50,13 +50,13 @@ const router = createRouter({
 
 router.beforeEach((to) => {
 	const updatingPassword = supabaseAuth.updatingPassword.value
-	console.log("updating:", updatingPassword, "going to:", to.path)
-	if (!updatingPassword && to.path == "/updatepassword") return "/forgotpassword"
+	console.log('updating:', updatingPassword, 'going to:', to.path)
+	if (!updatingPassword && to.path === '/updatepassword') return '/forgotpassword'
 	return true
 })
 router.beforeEach((to) => {
 	const session = supabaseAuth.session.value
-	if (session && ["/login", "/signup", "/forgotpassword"].includes(to.path)) return "/"
+	if (session && ['/login', '/signup', '/forgotpassword'].includes(to.path)) return '/'
 	return true
 })
 
