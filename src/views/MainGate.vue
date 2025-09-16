@@ -3,7 +3,7 @@ import { computed } from 'vue';
 import MainView from './MainView.vue';
 import LandingView from './LandingView.vue';
 
-import useSupabaseAuth from '@/composables/supabaseAuth';
+import useSupabaseAuth from '@/composables/useSupabaseAuth';
 
 const supabaseAuth = useSupabaseAuth()
 

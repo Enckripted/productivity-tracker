@@ -1,9 +1,8 @@
 import { ref, type Ref } from 'vue'
-import { createClient, type Session } from '@supabase/supabase-js'
+import { type Session } from '@supabase/supabase-js'
+import useSupabase from './useSupabase'
 
-const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL
-const SUPABASE_KEY = import.meta.env.VITE_SUPABASE_KEY
-const supabase = createClient(SUPABASE_URL, SUPABASE_KEY)
+const supabase = useSupabase()
 
 const session: Ref<Session | null> = ref(null)
 const updatingPassword = ref(false)
@@ -19,11 +18,10 @@ async function getSession() {
 }
 
 async function login(email: string, password: string) {
-	const { data, error } = await supabase.auth.signInWithPassword({
+	const { error } = await supabase.auth.signInWithPassword({
 		email: email,
 		password: password,
 	})
-	console.log(data, error)
 	return { error }
 }
 

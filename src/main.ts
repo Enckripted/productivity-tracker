@@ -3,7 +3,7 @@ import './assets/main.css'
 import { createApp } from 'vue'
 import App from './App.vue'
 import router from './router'
-import useSupabaseAuth from './composables/supabaseAuth'
+import useSupabaseAuth from './composables/useSupabaseAuth'
 
 const app = createApp(App)
 const supabaseAuth = useSupabaseAuth()

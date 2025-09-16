@@ -1,48 +1,59 @@
 <script setup lang="ts">
-import useHelperFunctions from '@/composables/helper';
+import useHelperFunctions from '@/composables/useHelper';
 
 import TimeBar from '@/components/TimeBar.vue';
+import { computed, onMounted } from 'vue';
+import useApp from '@/composables/useApp';
 
-const props = defineProps(["tasks", "workingTask", "workingStart"])
-const { currentTime, secsBetweenDates } = useHelperFunctions()
+const props = defineProps<{
+	useTimeToday: boolean
+}>()
+const app = useApp()
+const { now, onSameDay, secsBetweenDates, formatTimeSpent } = useHelperFunctions()
 
-function getTotalTime() {
+function getTimeSpentAsPercent(time: number) {
+	return time / totalTime.value
+}
+
+const taskList = computed(() => {
+	return app.tasks.value.map((task) => ({
+		id: task.id,
+		name: task.name,
+		color: task.color, //check if working task is being updated to prevent flashing of incorrect time
+		timeWorked: (props.useTimeToday ? task.secondsWorkedToday : task.secondsWorked) +
+			(app.workingTask.value === task.id && !app.updatingWorkingTask.value ? secsBetweenDates(now.value, app.workingStart.value) : 0),
+	})).filter((task) => task.timeWorked !== 0).sort((a, b) => b.timeWorked - a.timeWorked) //sort in reverse order
+})
+
+const totalTime = computed(() => {
 	let time = 0
-	for (let item of props.tasks) {
-		time += item.secondsSpent
+	for (const task of taskList.value) {
+		time += task.timeWorked
 	}
-	return time + (props.workingStart ? secsBetweenDates(currentTime(), props.workingStart) : 0)
-}
+	return time
+})
 
-function getTimeSpent(task) {
-	return task.secondsSpent + (task.name == props.workingTask ? secsBetweenDates(currentTime(), props.workingStart) : 0)
-}
+onMounted(() => {
+	setInterval(() => {
+		if (app.dayRunning && !onSameDay(now.value, app.dayStart.value))
+			app.endWorkday() //no need to await this
+	}, 1000)
+})
 
-function getTimeSpentAsPercent(task) {
-	return getTimeSpent(task) / getTotalTime()
-}
-
-function formatTimeSpent(timeInSecs) {
-	const secs = timeInSecs % 60
-	const mins = Math.floor((timeInSecs - secs) / 60) % 60
-	const hrs = Math.floor((timeInSecs - mins * 60 - secs) / 3600)
-
-	let result = ""
-	if (hrs > 0)
-		result += `${hrs} ${hrs != 1 ? "hrs" : "hr"} `
-	if (mins > 0)
-		result += `${mins} ${mins != 1 ? "mins" : "min"} `
-	result += `${secs} ${secs != 1 ? "secs" : "sec"}`
-	return result
-}
 </script>
 
 <template>
-	<div class="flex flex-col w-full gap-2 items-start" v-for="task in props.tasks" :key="task.name">
-		<div v-if="task.secondsSpent > 0 || workingTask == task.name" class="flex flex-col w-full gap-0.25 items-start">
-			<TimeBar :color="task.color" :percentage="getTimeSpentAsPercent(task)" />
-			<p class="text-sm italic" :key="task.secondsTracked">{{ task.name + " - " +
-				formatTimeSpent(getTimeSpent(task)) }}</p>
+	<div class="flex flex-col w-full gap-5" v-if="totalTime > 0">
+		<div class="flex flex-col w-full gap-2 items-start" v-for="task of taskList" :key="task.id">
+			<div v-if="task.timeWorked > 0 || app.workingTask.value == task.id"
+				class="flex flex-col w-full gap-0.25 items-start">
+				<TimeBar :color="task.color" :percentage="getTimeSpentAsPercent(task.timeWorked)" />
+				<p class="text-sm italic">{{ task.name + " - " +
+					formatTimeSpent(task.timeWorked) }}</p>
+			</div>
 		</div>
+	</div>
+	<div class="flex w-full justify-center" v-else>
+		<p class="mt-5 italic">No tasks worked yet!</p>
 	</div>
 </template>

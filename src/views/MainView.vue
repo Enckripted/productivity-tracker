@@ -1,51 +1,69 @@
 <script setup lang="ts">
-import { ref } from 'vue';
-import useLocalApi from '@/composables/localApi';
+import { onMounted, ref } from 'vue';
+import useApp from '@/composables/useApp';
+import useHelperFunctions from '@/composables/useHelper';
 
 import TaskModal from '@/components/TaskModal.vue';
-import TimeView from '@/components/TimeView.vue';
+import TaskMenu from '@/components/menus/TaskMenu.vue';
+import TodoMenu from '@/components/menus/TodoMenu.vue';
+import GoalsMenu from '@/components/menus/GoalsMenu.vue';
 
-const { tasks, dailyTasks, workdayStopped, workingTask, workingStart, createTask, setWorkingTask, startWorkday, stopWorkday } = useLocalApi()
+const app = useApp()
+const { now, formatTimeSpent, secsBetweenDates } = useHelperFunctions()
 
-const selectedView = ref(0)
+const menuType = ref(0)
 const showModal = ref(false)
 
-function handleWorkdayButton() {
-  if (workdayStopped.value)
-    startWorkday()
-  else
-    stopWorkday()
+async function handleModalSubmit(taskName: string, newTaskName: string, newTaskColor: string) {
+	if (taskName === "(create task)") {
+		const res = await app.createTask(newTaskName, newTaskColor)
+		app.setWorkingTask(res.id)
+	} else {
+		app.setWorkingTask(app.findTaskWithName(taskName).id)
+	}
+	showModal.value = false
 }
 
-function handleModalSubmit(taskName, newTaskName, newTaskColor) {
-  if (taskName == "(create task)") {
-    createTask(newTaskName, newTaskColor)
-    setWorkingTask(newTaskName)
-  } else {
-    setWorkingTask(taskName)
-  }
-  showModal.value = false
-}
+onMounted(async () => {
+	await app.loadInitialAppState()
+})
 </script>
 
 <template>
-  <div class="flex flex-col w-lg mx-auto p-5 gap-5 items-center">
-    <div class="flex flex-col items-center">
-      <p>Current task: {{ workingTask ? workingTask : "None" }}</p>
-      <button @click="showModal = true">Set task</button>
-    </div>
-    <div class="flex gap-5 justify-center">
-      <button @click="selectedView = 0">Daily</button>
-      <button @click="selectedView = 1">All Time</button>
-    </div>
-    <div class="flex flex-col w-full gap-5" v-if="selectedView == 0">
-      <TimeView :tasks="dailyTasks" :working-task="workingTask" :working-start="workingStart" />
-      <button @click="handleWorkdayButton">{{ workdayStopped ? "Start Workday" : "End Workday" }}</button>
-    </div>
-    <div class="flex flex-col w-full gap-5" v-if="selectedView == 1">
-      <TimeView :tasks="tasks" :working-task="workingTask" :working-start="workingStart" />
-    </div>
-  </div>
+	<div class="flex flex-col w-3xl mx-auto pt-10 gap-5">
+		<div class="flex flex-col w-full justify-start gap-0.25">
+			<h1 class="text-5xl font-bold">Welcome!</h1>
+			<h3 class="text-2xl">Current task: {{ app.workingTask.value !== -1 ?
+				app.findTaskWithId(app.workingTask.value).name : "None" }}</h3>
+			<h3 class="text-2xl">Worktime: {{ app.workingTask.value !== -1 ?
+				formatTimeSpent(secsBetweenDates(app.workingStart.value, now)) : "0 secs" }}</h3>
+			<button class="w-25 p-0.5 mt-2 text-lg bg-green-500 rounded-sm cursor-pointer" @click="showModal = true">Set
+				task</button>
+		</div>
+		<div class="flex w-full justify-start text-lg">
+			<div class="flex p-0.5 border-2 border-neutral-800 rounded-lg">
+				<button :class="menuType === 0 ? 'bg-green-500' : 'bg-transparent'"
+					class="w-35 p-0.5 rounded-md cursor-pointer" @click="menuType = 0">
+					Tasks
+					<span class="bg-red-500 px-1.5 rounded-md">9+</span>
+				</button>
+				<button :class="menuType === 1 ? 'bg-green-500' : 'bg-transparent'"
+					class="w-35 p-0.5 rounded-md cursor-pointer" @click="menuType = 1">
+					To-do List
+					<span class="bg-red-500 px-1.5 rounded-md">9+</span>
+				</button>
+				<button :class="menuType === 2 ? 'bg-green-500' : 'bg-transparent'"
+					class="w-35 p-0.5 rounded-md cursor-pointer" @click="menuType = 2">
+					Goals
+					<span class="bg-red-500 px-1.5 rounded-md">9+</span>
+				</button>
+			</div>
+		</div>
 
-  <TaskModal v-if="showModal" @submit="handleModalSubmit" />
+		<TaskMenu v-if="menuType === 0" />
+		<TodoMenu v-if="menuType === 1" />
+		<GoalsMenu v-if="menuType === 2" />
+	</div>
+
+	<TaskModal v-if="showModal" @submit="handleModalSubmit" />
 </template>

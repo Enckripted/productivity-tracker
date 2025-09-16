@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import useSupabaseAuth from '@/composables/supabaseAuth';
+import useSupabaseAuth from '@/composables/useSupabaseAuth';
 import router from '@/router';
 
 const supabaseAuth = useSupabaseAuth()

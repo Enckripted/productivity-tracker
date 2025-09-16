@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, computed } from "vue"
-import useSupabaseAuth from '@/composables/supabaseAuth';
+import useSupabaseAuth from '@/composables/useSupabaseAuth';
 
 import AuthLink from '@/components/auth/AuthLink.vue';
 import router from "@/router";
