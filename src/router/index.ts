@@ -1,5 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import useSupabaseAuth from '@/composables/useSupabaseAuth'
+import useSupabaseAuth from '@/composables/supabase/useSupabaseAuth'
 
 import LoginView from '@/views/auth/LoginView.vue'
 import SignupView from '@/views/auth/SignupView.vue'

@@ -14,29 +14,28 @@ const { now, formatTimeSpent, secsBetweenDates } = useHelperFunctions()
 const menuType = ref(0)
 const showModal = ref(false)
 
+
 async function handleModalSubmit(taskName: string, newTaskName: string, newTaskColor: string) {
 	if (taskName === "(create task)") {
-		const res = await app.createTask(newTaskName, newTaskColor)
-		app.setWorkingTask(res.id)
+		const res = await app.tasks.createTask(newTaskName, newTaskColor)
+		app.tasks.setWorkingTask(res.id)
 	} else {
-		app.setWorkingTask(app.findTaskWithName(taskName).id)
+		app.tasks.setWorkingTask(app.tasks.findTaskWithName(taskName).id)
 	}
 	showModal.value = false
 }
 
-onMounted(async () => {
-	await app.loadInitialAppState()
-})
+onMounted(app.appStartEvent)
 </script>
 
 <template>
 	<div class="flex flex-col w-3xl mx-auto pt-10 gap-5">
 		<div class="flex flex-col w-full justify-start gap-0.25">
 			<h1 class="text-5xl font-bold">Welcome!</h1>
-			<h3 class="text-2xl">Current task: {{ app.workingTask.value !== -1 ?
-				app.findTaskWithId(app.workingTask.value).name : "None" }}</h3>
-			<h3 class="text-2xl">Worktime: {{ app.workingTask.value !== -1 ?
-				formatTimeSpent(secsBetweenDates(app.workingStart.value, now)) : "0 secs" }}</h3>
+			<h3 class="text-2xl">Current task: {{ app.tasks.workingTask.value !== -1 ?
+				app.tasks.findTaskWithId(app.tasks.workingTask.value).name : "None" }}</h3>
+			<h3 class="text-2xl">Worktime: {{ app.tasks.workingTask.value !== -1 ?
+				formatTimeSpent(secsBetweenDates(app.tasks.workingStart.value, now)) : "0 secs" }}</h3>
 			<button class="w-25 p-0.5 mt-2 text-lg bg-green-500 rounded-sm cursor-pointer" @click="showModal = true">Set
 				task</button>
 		</div>

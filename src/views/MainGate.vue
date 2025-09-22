@@ -3,7 +3,7 @@ import { computed } from 'vue';
 import MainView from './MainView.vue';
 import LandingView from './LandingView.vue';
 
-import useSupabaseAuth from '@/composables/useSupabaseAuth';
+import useSupabaseAuth from '@/composables/supabase/useSupabaseAuth';
 
 const supabaseAuth = useSupabaseAuth()
 
@@ -11,5 +11,5 @@ const authenticated = computed(() => supabaseAuth.session.value)
 </script>
 
 <template>
-  <component :is="authenticated ? MainView : LandingView"></component>
+	<component :is="authenticated ? MainView : LandingView"></component>
 </template>

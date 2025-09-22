@@ -3,12 +3,12 @@ import useHelperFunctions from '@/composables/useHelper';
 
 import TimeBar from '@/components/TimeBar.vue';
 import { computed, onMounted } from 'vue';
-import useApp from '@/composables/useApp';
+import useTasks from '@/composables/useTasks';
 
 const props = defineProps<{
 	useTimeToday: boolean
 }>()
-const app = useApp()
+const app = useTasks()
 const { now, onSameDay, secsBetweenDates, formatTimeSpent } = useHelperFunctions()
 
 function getTimeSpentAsPercent(time: number) {
@@ -16,7 +16,7 @@ function getTimeSpentAsPercent(time: number) {
 }
 
 const taskList = computed(() => {
-	return app.tasks.value.map((task) => ({
+	return app.taskList.value.map((task) => ({
 		id: task.id,
 		name: task.name,
 		color: task.color, //check if working task is being updated to prevent flashing of incorrect time

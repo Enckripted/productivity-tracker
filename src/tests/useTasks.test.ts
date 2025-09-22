@@ -1,5 +1,5 @@
 import { vi, describe, it, beforeEach, expect } from 'vitest'
-import useApp from '@/composables/useApp'
+import useTasks from '@/composables/useTasks'
 import type { Task } from '@/types/shared.types'
 
 const mock = vi.hoisted(() => {
@@ -18,13 +18,13 @@ const mock = vi.hoisted(() => {
 		wipeDailyTimes: vi.fn(),
 	}
 })
-vi.mock('@/composables/useSupabaseApi', () => {
+vi.mock('@/composables/supabase/useSupabaseTasks', () => {
 	return {
 		default: () => mock,
 	}
 })
 
-const app = useApp()
+const app = useTasks()
 
 const baseTask: Task = {
 	id: 0,
@@ -43,7 +43,7 @@ const dayPastFiveMins = new Date(start)
 dayPastFiveMins.setDate(dayPastFiveMins.getDate() + 1)
 dayPastFiveMins.setHours(0, 5, 0, 0)
 
-describe('App Logic Test', () => {
+describe('Tasks unit test', () => {
 	beforeEach(async () => {
 		vi.clearAllMocks()
 
@@ -56,11 +56,11 @@ describe('App Logic Test', () => {
 			dayRunning: false,
 			dayStart: new Date('2000-01-01 00:00:00+00'),
 		})
-		await app.loadInitialAppState()
+		await app.loadInitialState()
 	})
 
 	it('Should have loaded initial state', () => {
-		expect(app.tasks.value).toHaveLength(0)
+		expect(app.taskList.value).toHaveLength(0)
 		expect(app.workingTask.value).toBe(-1)
 		expect(app.dayRunning.value).toBe(false)
 	})
@@ -69,8 +69,8 @@ describe('App Logic Test', () => {
 		mock.createTask.mockResolvedValueOnce(baseTask)
 		await app.createTask('Idling', '#ABCDEF')
 
-		expect(app.tasks.value).toHaveLength(1)
-		expect(app.tasks.value[0]).toMatchObject(baseTask)
+		expect(app.taskList.value).toHaveLength(1)
+		expect(app.taskList.value[0]).toMatchObject(baseTask)
 	})
 
 	it('Should edit a task', async () => {
@@ -86,8 +86,8 @@ describe('App Logic Test', () => {
 		})
 		await app.editTask(0, 'Task', '#000000')
 
-		expect(app.tasks.value).toHaveLength(1)
-		expect(app.tasks.value[0]).toMatchObject({
+		expect(app.taskList.value).toHaveLength(1)
+		expect(app.taskList.value[0]).toMatchObject({
 			id: 0,
 			userId: 'blank',
 			name: 'Task',
@@ -102,7 +102,7 @@ describe('App Logic Test', () => {
 		await app.createTask('Idling', '#ABCDEF')
 		await app.deleteTask(0)
 
-		expect(app.tasks.value).toHaveLength(0)
+		expect(app.taskList.value).toHaveLength(0)
 	})
 
 	it('Should start the workday', async () => {
@@ -134,7 +134,7 @@ describe('App Logic Test', () => {
 
 		expect(app.workingTask.value).toBe(1)
 		expect(app.workingStart.value.toISOString()).toBe(fiveMinsPastStart.toISOString())
-		expect(app.tasks.value[0]).toMatchObject({
+		expect(app.taskList.value[0]).toMatchObject({
 			secondsWorked: 300,
 			secondsWorkedToday: 300,
 		})
@@ -149,7 +149,7 @@ describe('App Logic Test', () => {
 		vi.setSystemTime(dayPastFiveMins)
 		await app.setWorkingTask(0)
 
-		expect(app.tasks.value[0]).toMatchObject({
+		expect(app.taskList.value[0]).toMatchObject({
 			secondsWorked: 60 * 60 * 24,
 		})
 		expect(app.workingStart.value.toISOString()).toBe(dayPastFiveMins.toISOString())
@@ -163,8 +163,8 @@ describe('App Logic Test', () => {
 
 		vi.setSystemTime(dayPastFiveMins)
 		await app.endWorkday()
-		console.log(app.tasks.value[0])
-		expect(app.tasks.value[0]).toMatchObject({
+		console.log(app.taskList.value[0])
+		expect(app.taskList.value[0]).toMatchObject({
 			secondsWorked: 60 * 60 * 24,
 			secondsWorkedToday: 0,
 		})

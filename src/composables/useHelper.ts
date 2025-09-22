@@ -5,7 +5,7 @@ setInterval(() => {
 	now.value = new Date()
 }, 1000)
 
-function onSameDay(d1: Date, d2: Date) {
+function datesOnSameDay(d1: Date, d2: Date) {
 	return d1.toDateString() === d2.toDateString()
 }
 
@@ -21,7 +21,7 @@ function getNextDay(from: Date) {
 }
 
 function secsWorkedSince(start: Date) {
-	if (onSameDay(start, new Date())) {
+	if (datesOnSameDay(start, new Date())) {
 		return secsBetweenDates(start, new Date())
 	} else {
 		return secsBetweenDates(start, getNextDay(start))
@@ -43,7 +43,7 @@ function formatTimeSpent(timeInSecs: number) {
 export default function useHelperFunctions() {
 	return {
 		now,
-		onSameDay,
+		datesOnSameDay,
 		secsBetweenDates,
 		getNextDay,
 		secsWorkedSince,

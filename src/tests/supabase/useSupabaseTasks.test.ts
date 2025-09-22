@@ -1,16 +1,16 @@
 import { describe, beforeEach, expect, it } from 'vitest'
-import useSupabaseApi from '@/composables/useSupabaseApi'
-import useSupabase from '@/composables/useSupabase'
-import useSupabaseAuth from '@/composables/useSupabaseAuth'
+import useSupabaseTasks from '@/composables/supabase/useSupabaseTasks'
+import useSupabase from '@/composables/supabase/useSupabase'
+import useSupabaseAuth from '@/composables/supabase/useSupabaseAuth'
 import { computed } from 'vue'
 
 const supabase = useSupabase()
-const supabaseApi = useSupabaseApi()
+const supabaseApi = useSupabaseTasks()
 const { session, login, signup } = useSupabaseAuth()
 
 const userId = computed(() => (session.value ? session.value.user.id : ''))
 
-describe('Supabase API Integration ', async () => {
+describe('Supabase Tasks Integration', async () => {
 	const { error } = await signup('test@yopmail.com', 'abcdef')
 	if (error) await login('test@yopmail.com', 'abcdef')
 

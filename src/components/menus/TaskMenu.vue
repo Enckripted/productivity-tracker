@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { ref } from 'vue';
-import useApp from '@/composables/useApp';
+import useTasks from '@/composables/useTasks';
 
 import TimeView from '@/components/TimeView.vue';
 
-const app = useApp()
+const app = useTasks()
 
 const selectedView = ref(0)
 

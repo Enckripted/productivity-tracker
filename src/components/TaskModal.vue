@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue';
-import useApp from '@/composables/useApp';
+import useTasks from '@/composables/useTasks';
 import useHelperFunctions from '@/composables/useHelper';
 
 const emit = defineEmits(["submit"])
-const app = useApp()
+const app = useTasks()
 const { secsWorkedSince } = useHelperFunctions()
 
 const selectedTask = ref("")
@@ -26,7 +26,7 @@ function submitModal() {
 
 const taskList = computed(() => {
 	const workingSecs = secsWorkedSince(app.workingStart.value)
-	return app.tasks.value.slice().sort((a, b) => (b.secondsWorked + (b.id === app.workingTask.value ? workingSecs : 0)) - (a.secondsWorked + (a.id === app.workingTask.value ? workingSecs : 0)))
+	return app.taskList.value.slice().sort((a, b) => (b.secondsWorked + (b.id === app.workingTask.value ? workingSecs : 0)) - (a.secondsWorked + (a.id === app.workingTask.value ? workingSecs : 0)))
 })
 </script>
 

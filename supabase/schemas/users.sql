@@ -1,10 +1,12 @@
-drop table if exists public.users;
 create table if not exists public.users (
     id uuid primary key references auth.users(id) on delete cascade,
+    last_update timestamptz default now() not null,
+    
     working_task bigint default -1,
     working_start timestamptz default '2000-01-01 00:00:00+00' not null,
     day_running boolean default false not null,
-    day_start timestamptz default '2000-01-01 00:00:00+00' not null
+    day_start timestamptz default '2000-01-01 00:00:00+00' not null,
+    goal_streak bigint default 0 not null
 );
 
 alter table public.users enable row level security;

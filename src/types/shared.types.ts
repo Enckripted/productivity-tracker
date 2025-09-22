@@ -7,6 +7,14 @@ export interface Task {
 	secondsWorkedToday: number
 }
 
+export interface Goal {
+	id: number
+	taskId: number
+	secondsThreshold: number
+	goalUnderThreshold: boolean
+	completed: boolean
+}
+
 export interface AppState {
 	tasks: Array<Task>
 	workingTask: number

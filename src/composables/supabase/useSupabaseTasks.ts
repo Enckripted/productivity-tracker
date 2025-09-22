@@ -114,7 +114,7 @@ async function setWorkingTask(id: number, start: Date) {
 	if (error) throw error
 }
 
-export default function useSupabaseApi() {
+export default function useSupabaseTasks() {
 	return {
 		getAppState,
 		wipeDailyTimes,
