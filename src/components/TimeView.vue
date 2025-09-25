@@ -9,7 +9,7 @@ const props = defineProps<{
 	useTimeToday: boolean
 }>()
 const app = useTasks()
-const { now, onSameDay, secsBetweenDates, formatTimeSpent } = useHelperFunctions()
+const { now, datesOnSameDay, secsBetweenDates, formatTimeSpent } = useHelperFunctions()
 
 function getTimeSpentAsPercent(time: number) {
 	return time / totalTime.value
@@ -35,7 +35,7 @@ const totalTime = computed(() => {
 
 onMounted(() => {
 	setInterval(() => {
-		if (app.dayRunning && !onSameDay(now.value, app.dayStart.value))
+		if (app.dayRunning && !datesOnSameDay(now.value, app.dayStart.value))
 			app.endWorkday() //no need to await this
 	}, 1000)
 })

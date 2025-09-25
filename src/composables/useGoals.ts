@@ -49,6 +49,7 @@ async function editGoal(
 async function deleteGoal(id: number) {
 	await supabaseApi.deleteGoal(id)
 	goalsList.value = goalsList.value.filter((goal) => goal.id !== id)
+	console.log('deleted')
 }
 
 async function completeGoal(id: number) {
@@ -59,7 +60,7 @@ async function completeGoal(id: number) {
 function canCompleteGoal(id: number) {
 	if (!tasks.dayRunning.value) return false
 
-	const workingGoal = getGoalWithTask(id)
+	const workingGoal = getGoal(id)
 	const timeWorked =
 		tasks.findTaskWithId(tasks.workingTask.value).secondsWorked +
 		secsWorkedSince(tasks.workingStart.value)
@@ -98,10 +99,10 @@ async function clearStreak() {
 watch(tasks.taskList, async (cur, old) => {
 	if (cur.length >= old.length) return //only run this code on deletions
 
-	const removed = old.filter((task) => cur.includes(task))
+	const removed = old.filter((task) => !cur.includes(task))
 	for (const task of removed) {
-		const res = goalsList.value.find((goal) => goal.taskId === task.id)
-		if (res) await deleteGoal(res.id)
+		const res = getGoalWithTask(task.id)
+		await deleteGoal(res.id)
 	}
 })
 

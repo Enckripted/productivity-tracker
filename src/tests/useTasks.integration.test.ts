@@ -17,11 +17,12 @@ fiveMinsPastStart.setHours(0, 5, 0, 0)
 const dayPastFiveMins = new Date(fiveMinsPastStart)
 dayPastFiveMins.setDate(dayPastFiveMins.getDate() + 1)
 
-describe('Tasks integration test', async () => {
-	const { error } = await signup('test@yopmail.com', 'abcdef')
-	if (error) await login('test@yopmail.com', 'abcdef')
-
+describe('Tasks integration test', () => {
 	beforeEach(async () => {
+		if (!session.value) {
+			const { error } = await signup('test@yopmail.com', 'abcdef')
+			if (error) await login('test@yopmail.com', 'abcdef')
+		}
 		await supabase
 			.from('users')
 			.update({
@@ -41,7 +42,6 @@ describe('Tasks integration test', async () => {
 			.eq('name', 'Idling')
 
 		await app.loadInitialState()
-		console.log(app.taskList)
 		vi.useFakeTimers()
 	})
 

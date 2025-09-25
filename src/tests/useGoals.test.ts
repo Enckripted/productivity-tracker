@@ -95,18 +95,18 @@ describe('Goals unit test', () => {
 		mockTasks.workingStart.value = twoMinsBeforeNow
 
 		mockTasks.findTaskWithId.mockReturnValue({ secondsWorked: 60 })
-		expect(app.canCompleteGoal(baseGoal().taskId)).toBe(false)
+		expect(app.canCompleteGoal(baseGoal().id)).toBe(false)
 		mockTasks.findTaskWithId.mockReturnValue({ secondsWorked: 180 })
-		expect(app.canCompleteGoal(baseGoal().taskId)).toBe(true)
+		expect(app.canCompleteGoal(baseGoal().id)).toBe(true)
 
 		const edited = { ...baseGoal(), goalUnderThreshold: true }
 		mockSupabase.editGoal.mockResolvedValueOnce(edited)
 		await app.editGoal(edited.id, edited.taskId, edited.secondsThreshold, true)
 
 		mockTasks.findTaskWithId.mockReturnValue({ secondsWorked: 60 })
-		expect(app.canCompleteGoal(baseGoal().taskId)).toBe(true)
+		expect(app.canCompleteGoal(baseGoal().id)).toBe(true)
 		mockTasks.findTaskWithId.mockReturnValue({ secondsWorked: 180 })
-		expect(app.canCompleteGoal(baseGoal().taskId)).toBe(false)
+		expect(app.canCompleteGoal(baseGoal().id)).toBe(false)
 	})
 
 	it('Should check if all goals are completed', async () => {
