@@ -3,8 +3,10 @@ import useTasks from './useTasks'
 import useGoals from './useGoals'
 import useSupabase from './supabase/useSupabase'
 import useHelperFunctions from './useHelper'
+import useSupabaseAuth from './supabase/useSupabaseAuth'
 
 const supabase = useSupabase()
+const supabaseAuth = useSupabaseAuth()
 const tasks = useTasks()
 const goals = useGoals()
 const { datesOnSameDay } = useHelperFunctions()
@@ -24,6 +26,7 @@ async function setLastUpdate(time: Date) {
 		.update({
 			last_update: time.toISOString(),
 		})
+		.eq('id', supabaseAuth.session.value?.user.id || '-1')
 		.select('last_update')
 		.single()
 	if (error) throw error
@@ -51,9 +54,10 @@ async function dayChangeEvent() {
 async function update() {
 	const now = new Date()
 
+	/*
 	if (goals.canCompleteGoal(tasks.workingTask.value))
 		await goals.completeGoal(tasks.workingTask.value)
-
+	*/
 	if (!datesOnSameDay(now, lastUpdate.value)) await dayChangeEvent()
 }
 

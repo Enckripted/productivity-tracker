@@ -3,26 +3,25 @@ import { onMounted, ref } from 'vue';
 import useApp from '@/composables/useApp';
 import useHelperFunctions from '@/composables/useHelper';
 
-import TaskModal from '@/components/TaskModal.vue';
+import BaseModal from '@/components/base/BaseModal.vue';
 import TaskMenu from '@/components/menus/TaskMenu.vue';
 import TodoMenu from '@/components/menus/TodoMenu.vue';
 import GoalsMenu from '@/components/menus/GoalsMenu.vue';
+import TaskDropdown from '@/components/TaskDropdown.vue';
+import TaskDeleteModal from '@/components/TaskDeleteModal.vue';
+import TaskEditModal from '@/components/TaskEditModal.vue';
 
 const app = useApp()
 const { now, formatTimeSpent, secsBetweenDates } = useHelperFunctions()
 
 const menuType = ref(0)
+
 const showModal = ref(false)
+const modalSelection = ref(-1)
 
-
-async function handleModalSubmit(taskName: string, newTaskName: string, newTaskColor: string) {
-	if (taskName === "(create task)") {
-		const res = await app.tasks.createTask(newTaskName, newTaskColor)
-		app.tasks.setWorkingTask(res.id)
-	} else {
-		app.tasks.setWorkingTask(app.tasks.findTaskWithName(taskName).id)
-	}
-	showModal.value = false
+function modalSubmit() {
+	if (app.tasks.dayRunning && modalSelection.value !== -1)
+		app.tasks.setWorkingTask(modalSelection.value)
 }
 
 onMounted(app.appStartEvent)
@@ -64,5 +63,11 @@ onMounted(app.appStartEvent)
 		<GoalsMenu v-if="menuType === 2" />
 	</div>
 
-	<TaskModal v-if="showModal" @submit="handleModalSubmit" />
+	<BaseModal title="Set Task" button-text="Set Task" button-color="bg-green-500" v-model:active="showModal"
+		@submit="modalSubmit">
+		<TaskDropdown v-model="modalSelection" />
+	</BaseModal>
+
+	<TaskEditModal />
+	<TaskDeleteModal />
 </template>

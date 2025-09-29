@@ -11,6 +11,10 @@ const { secsWorkedSince } = useHelperFunctions()
 const goalsList: Ref<Goal[]> = ref([])
 const streak = ref(0)
 
+function goalExistsWithTask(taskId: number) {
+	return !!goalsList.value.find((goal) => goal.taskId === taskId)
+}
+
 function getGoal(id: number) {
 	const res = goalsList.value.find((goal) => goal.id === id)
 	if (!res) throw new Error('Goal with id ' + id + ' does not exist')
@@ -101,8 +105,10 @@ watch(tasks.taskList, async (cur, old) => {
 
 	const removed = old.filter((task) => !cur.includes(task))
 	for (const task of removed) {
-		const res = getGoalWithTask(task.id)
-		await deleteGoal(res.id)
+		if (goalExistsWithTask(task.id)) {
+			const res = getGoalWithTask(task.id)
+			await deleteGoal(res.id)
+		}
 	}
 })
 
