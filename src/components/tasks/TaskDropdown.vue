@@ -48,7 +48,8 @@ function selectFromDropdown(id: number) {
 	<div class="flex flex-col items-start w-full">
 		<div class="flex w-full items-center justify-between p-1 bg-zinc-800 border-b border-b-white cursor-pointer"
 			@click="toggleDropdown">
-			<TaskDropdownItem :name="selectedTask.name" :color="selectedTask.color" />
+			<TaskDropdownItem v-if="selection !== -1" :name="selectedTask.name" :color="selectedTask.color" />
+			<TaskDropdownItem v-else name="(none selected)" color="#000000" />
 			<div class="flex w-10 h-full items-center justify-center">
 				<img src="@/assets/down.svg" alt="Dropdown" />
 			</div>

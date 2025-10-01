@@ -11,9 +11,15 @@ const active = defineModel<boolean>("active")
 const taskId = ref(-1)
 const goalMinutes = ref(0)
 
+const errorMsg = ref("")
+
 function submitModal() {
-	if (taskId.value === -1)
+	if (!Number.isInteger(goalMinutes) || goalMinutes.value < 0) {
 		return
+	}
+	if (taskId.value === -1) {
+		return
+	}
 
 	app.goals.createGoal(taskId.value, goalMinutes.value * 60, false)
 }
@@ -34,5 +40,6 @@ function submitModal() {
 				<span>minutes</span>
 			</div>
 		</div>
+		<p color="text-red-500">{{ errorMsg }}</p>
 	</BaseModal>
 </template>

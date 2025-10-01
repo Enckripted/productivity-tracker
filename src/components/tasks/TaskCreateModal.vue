@@ -12,6 +12,8 @@ const emit = defineEmits(["close"])
 const taskName = ref("")
 const taskColor = ref("")
 
+const errorMsg = ref("")
+
 const previewName = computed(() => {
 	return taskName.value ? taskName.value : "<unnamed>"
 })
@@ -24,6 +26,14 @@ function closeModal() {
 }
 
 function modalSubmit() {
+	if (!taskName.value || !taskColor.value) {
+		errorMsg.value = "Please fill out all fields"
+		return
+	}
+	if (taskName.value.length > 32) {
+		errorMsg.value = "Please type a shorter name"
+		return
+	}
 	app.tasks.createTask(taskName.value, taskColor.value)
 	closeModal()
 }
@@ -47,5 +57,6 @@ function modalSubmit() {
 			</div>
 			<p class="text-sm italic">{{ previewName }} - 20 hrs 20 mins 20 secs</p>
 		</div>
+		<p>{{ errorMsg }}</p>
 	</BaseModal>
 </template>

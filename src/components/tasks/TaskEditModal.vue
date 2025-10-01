@@ -12,6 +12,8 @@ const { taskEditModal } = useModals()
 const taskName = ref("")
 const taskColor = ref("")
 
+const errorMsg = ref("")
+
 function onIdChange(newId: number) {
 	const task = app.tasks.findTaskWithId(newId)
 	taskName.value = task.name
@@ -19,6 +21,14 @@ function onIdChange(newId: number) {
 }
 
 function modalSubmit() {
+	if (!taskName.value || !taskColor.value) {
+		errorMsg.value = "Please fill out all fields"
+		return
+	}
+	if (taskName.value.length > 32) {
+		errorMsg.value = "Please type a shorter name"
+		return
+	}
 	app.tasks.editTask(taskEditModal.id.value, taskName.value, taskColor.value)
 }
 
@@ -43,5 +53,6 @@ watch(taskEditModal.id, onIdChange)
 			</div>
 			<p class="text-sm italic">{{ taskName }} - 2 hours 2 minutes 2 seconds</p>
 		</div>
+		<p>{{ errorMsg }}</p>
 	</BaseModal>
 </template>

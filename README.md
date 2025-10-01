@@ -2,6 +2,8 @@
 
 Name is a WIP (so is the rest of this project honestly)
 
+Allows you to keep track of time spent on different tasks and set goals to hit certain time amounts on different tasks. All you need is an account.
+
 ## Recommended IDE Setup
 
 [VSCode](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur).

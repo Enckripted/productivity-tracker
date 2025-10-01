@@ -2,7 +2,6 @@
 import { ref, computed, watch } from "vue"
 import useSupabaseAuth from '@/composables/supabase/useSupabaseAuth'
 import AuthLink from '@/components/auth/AuthLink.vue'
-import router from "@/router"
 
 const supabaseAuth = useSupabaseAuth()
 
@@ -10,6 +9,7 @@ const email = ref("")
 const password = ref("")
 
 const errorMsg = ref("")
+const success = ref(false)
 const submitting = ref(false)
 
 const buttonStyling = computed(() => [
@@ -21,12 +21,16 @@ const buttonStyling = computed(() => [
 
 async function submitSignupForm() {
 	submitting.value = true
+	success.value = false
+	errorMsg.value = ""
+
 	const { error } = await supabaseAuth.signup(email.value, password.value)
 	if (error) {
 		errorMsg.value = error.message
 	} else {
-		router.push("/")
+		success.value = true
 	}
+
 	submitting.value = false
 }
 
@@ -59,7 +63,13 @@ watch(supabaseAuth.session, () => {
 				</button>
 			</form>
 
-			<p v-if="errorMsg" class="text-red-500 text-center mt-2">{{ errorMsg }}</p>
+			<p v-if="success" class="text-green-500 text-center mt-2">
+				Account created successfully! Please check your email to verify your account.
+			</p>
+
+			<p v-else-if="errorMsg" class="text-red-500 text-center mt-2">
+				{{ errorMsg }}
+			</p>
 
 			<div class="flex flex-col text-center text-sm text-gray-400 mt-3">
 				<p>
