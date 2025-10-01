@@ -2,7 +2,13 @@
 
 Name is a WIP (so is the rest of this project honestly)
 
-Allows you to keep track of time spent on different tasks and set goals to hit certain time amounts on different tasks. All you need is an account.
+Allows you to keep track of time spent on different tasks and set goals to hit certain time amounts on different tasks.
+
+Still need to implement:
+
+- Proper error handling
+- Todo list integration
+- More controls for goal setting (ex. ability to set goals under a threshold, only idle for 1 hr a day)
 
 ## Recommended IDE Setup
 

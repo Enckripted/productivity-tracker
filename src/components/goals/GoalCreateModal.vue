@@ -14,10 +14,10 @@ const goalMinutes = ref(0)
 const errorMsg = ref("")
 
 function submitModal() {
-	if (!Number.isInteger(goalMinutes) || goalMinutes.value < 0) {
+	if (!Number.isInteger(goalMinutes.value) || goalMinutes.value < 0) {
 		return
 	}
-	if (taskId.value === -1) {
+	if (taskId.value === -1 || app.goals.goalsList.value.find((goal) => goal.taskId === taskId.value)) {
 		return
 	}
 
