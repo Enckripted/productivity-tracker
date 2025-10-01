@@ -1,6 +1,6 @@
-# vue-project
+# productivity-tracker
 
-This template should help get you started developing with Vue 3 in Vite.
+Name is a WIP (so is the rest of this project honestly)
 
 ## Recommended IDE Setup
 
