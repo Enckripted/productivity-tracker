@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
-import { computed, nextTick } from 'vue'
+import { computed } from 'vue'
 import useGoals from '@/composables/useGoals'
 import useTasks from '@/composables/useTasks'
 import useSupabase from '@/composables/supabase/useSupabase'
@@ -71,14 +71,6 @@ describe('Goals integration test', () => {
 		expect(goals.goalsList.value).toHaveLength(0)
 	})
 
-	it('Should mark a goal completed', async () => {
-		const taskId = tasks.taskList.value[0].id
-		await goals.createGoal(taskId, 300, false)
-		await goals.completeGoal(goals.goalsList.value[0].id)
-
-		expect(goals.goalsList.value[0].completed).toBe(true)
-	})
-
 	it('Should be able to detect if a goal can be completed', async () => {
 		const taskId = tasks.taskList.value[0].id
 		await goals.createGoal(taskId, 240, false)
@@ -88,15 +80,6 @@ describe('Goals integration test', () => {
 		expect(goals.canCompleteGoal(goals.goalsList.value[0].id)).toBe(false)
 		vi.setSystemTime(fiveMinsPastStart)
 		expect(goals.canCompleteGoal(goals.goalsList.value[0].id)).toBe(true)
-	})
-
-	it('Should clear all completions', async () => {
-		const taskId = tasks.taskList.value[0].id
-		await goals.createGoal(taskId, 100, false)
-		await goals.completeGoal(goals.goalsList.value[0].id)
-		await goals.clearGoalCompletions()
-
-		expect(goals.goalsList.value[0].completed).toBe(false)
 	})
 
 	it('Should increment and clear goal streak', async () => {

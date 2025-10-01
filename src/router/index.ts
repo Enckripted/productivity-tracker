@@ -51,7 +51,7 @@ const router = createRouter({
 router.beforeEach((to) => {
 	const updatingPassword = supabaseAuth.updatingPassword.value
 	console.log('updating:', updatingPassword, 'going to:', to.path)
-	if (!updatingPassword && to.path === '/updatepassword') return '/forgotpassword'
+	//if (!updatingPassword && to.path === '/updatepassword') return '/forgotpassword'
 	return true
 })
 router.beforeEach((to) => {

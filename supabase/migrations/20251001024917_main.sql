@@ -4,8 +4,7 @@
     "user_id" uuid not null default auth.uid(),
     "task_id" bigint not null,
     "seconds_threshold" bigint not null,
-    "goal_under_threshold" boolean not null,
-    "completed" boolean not null
+    "goal_under_threshold" boolean not null
       );
 
 

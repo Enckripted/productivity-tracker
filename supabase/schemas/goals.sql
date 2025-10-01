@@ -3,8 +3,7 @@ create table if not exists goals(
     user_id uuid default auth.uid() references auth.users(id) not null,
     task_id bigint not null,
     seconds_threshold bigint not null,
-    goal_under_threshold boolean not null,
-    completed boolean not null
+    goal_under_threshold boolean not null
 );
 
 alter table goals enable row level security;

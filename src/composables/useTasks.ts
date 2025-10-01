@@ -45,6 +45,13 @@ function findTaskWithId(id: number) {
 	return res
 }
 
+function taskTimeWorkedToday(id: number) {
+	return (
+		findTaskWithId(id).secondsWorkedToday +
+		(workingTask.value === id ? timeWorkedBetween(workingStart.value, new Date()) : 0)
+	)
+}
+
 function timeWorkedBetween(workStart: Date, workEnd: Date) {
 	if (datesOnSameDay(workStart, workEnd)) return secondsBetweenDates(workStart, workEnd)
 	else return secondsBetweenDates(workStart, dateOnNextDay(workStart))
@@ -74,6 +81,7 @@ async function editTask(id: number, name: string, color: string) {
 }
 
 async function deleteTask(id: number) {
+	if (workingTask.value === id) await setWorkingTask(findTaskWithName('Idling').id)
 	await supabaseApi.deleteTask(id)
 	taskList.value = taskList.value.filter((task) => task.id !== id)
 }
@@ -90,7 +98,6 @@ async function setWorkingTask(id: number) {
 
 	if (workingTask.value !== -1) {
 		//working task is not null, get time between
-		console.log('time spent: ', timeWorkedBetween(workingStart.value, now))
 		await addSecondsToTask(workingTask.value, timeWorkedBetween(workingStart.value, now))
 		updatingWorkingTask.value = true
 	}
@@ -135,6 +142,7 @@ export default function useTasks() {
 		taskExists,
 		findTaskWithName,
 		findTaskWithId,
+		taskTimeWorkedToday,
 		taskList,
 		workingTask,
 		workingStart,

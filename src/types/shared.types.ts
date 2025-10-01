@@ -12,7 +12,6 @@ export interface Goal {
 	taskId: number
 	secondsThreshold: number
 	goalUnderThreshold: boolean
-	completed: boolean
 }
 
 export interface AppState {

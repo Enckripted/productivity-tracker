@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import useHelperFunctions from '@/composables/useHelper';
 
-import TimeBar from '@/components/TimeBar.vue';
+import TimeBar from '@/components/tasks/TimeBar.vue';
 import { computed, onMounted } from 'vue';
 import useTasks from '@/composables/useTasks';
 import useModals from '@/composables/useModals';
@@ -10,7 +10,7 @@ const props = defineProps<{
 	useTimeToday: boolean
 }>()
 const app = useTasks()
-const { openEditModal, openDeleteModal } = useModals()
+const { taskEditModal, taskDeleteModal } = useModals()
 const { now, datesOnSameDay, secsBetweenDates, formatTimeSpent } = useHelperFunctions()
 
 function getTimeSpentAsPercent(time: number) {
@@ -24,7 +24,7 @@ const taskList = computed(() => {
 		color: task.color, //check if working task is being updated to prevent flashing of incorrect time
 		timeWorked: (props.useTimeToday ? task.secondsWorkedToday : task.secondsWorked) +
 			(app.workingTask.value === task.id && !app.updatingWorkingTask.value ? secsBetweenDates(now.value, app.workingStart.value) : 0),
-	})).filter((task) => task.timeWorked !== 0).sort((a, b) => b.timeWorked - a.timeWorked) //sort in reverse order
+	})).filter((task) => task.timeWorked !== 0 || task.id === app.workingTask.value).sort((a, b) => b.timeWorked - a.timeWorked) //sort in reverse order
 })
 
 const totalTime = computed(() => {
@@ -55,10 +55,10 @@ onMounted(() => {
 					<span class="text-sm italic">{{ task.name + " - " + formatTimeSpent(task.timeWorked) }}</span>
 					<div v-if="task.name !== 'Idling'" class="flex gap-1">
 						<span class="text-blue-300 text-sm italic underline cursor-pointer"
-							@click="() => openEditModal(task.id)">Edit</span>
+							@click="() => taskEditModal.open(task.id)">Edit</span>
 						<span class="text-sm">-</span>
 						<span class="text-red-400 text-sm italic underline cursor-pointer"
-							@click="() => openDeleteModal(task.id)">Delete</span>
+							@click="() => taskDeleteModal.open(task.id)">Delete</span>
 					</div>
 				</div>
 			</div>

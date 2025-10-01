@@ -1,12 +1,13 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue';
 import useApp from '@/composables/useApp';
-import BaseModal from './base/BaseModal.vue';
+import BaseModal from '@/components/base/BaseModal.vue';
 import TimeBar from './TimeBar.vue';
 
 const app = useApp()
 
 const active = defineModel<boolean>("active")
+const emit = defineEmits(["close"])
 
 const taskName = ref("")
 const taskColor = ref("")
@@ -18,14 +19,19 @@ const previewColor = computed(() => {
 	return taskColor.value ? taskColor.value : "#008FFF"
 })
 
+function closeModal() {
+	emit("close")
+}
+
 function modalSubmit() {
 	app.tasks.createTask(taskName.value, taskColor.value)
+	closeModal()
 }
 </script>
 
 <template>
-	<BaseModal title="Create Task" button-text="Create" button-color="bg-green-500" v-model:active="active"
-		@submit="modalSubmit">
+	<BaseModal title="Create Task" button-text="Create" button-color="bg-green-600 hover:bg-green-700"
+		v-model:active="active" @submit="modalSubmit" @cancel="closeModal">
 		<div class="flex flex-col w-full">
 			<label class="italic mb-1">Name</label>
 			<input class="border-b-2 border-b-white" type="text" v-model="taskName" />
@@ -39,7 +45,7 @@ function modalSubmit() {
 			<div class="flex">
 				<TimeBar :percentage="100" :color="previewColor" />
 			</div>
-			<p class="text-sm italic">{{ previewName }} - 2 hours 2 minutes 2 seconds</p>
+			<p class="text-sm italic">{{ previewName }} - 20 hrs 20 mins 20 secs</p>
 		</div>
 	</BaseModal>
 </template>

@@ -3,32 +3,31 @@ import { ref, watch } from 'vue';
 import useApp from '@/composables/useApp';
 import useModals from '@/composables/useModals';
 
-import BaseModal from './base/BaseModal.vue';
+import BaseModal from '@/components/base/BaseModal.vue';
 import TimeBar from './TimeBar.vue';
 
 const app = useApp()
-const { editId, editActive } = useModals()
+const { taskEditModal } = useModals()
 
 const taskName = ref("")
 const taskColor = ref("")
 
 function onIdChange(newId: number) {
-	console.log(editActive.value)
 	const task = app.tasks.findTaskWithId(newId)
 	taskName.value = task.name
 	taskColor.value = task.color
 }
 
 function modalSubmit() {
-	app.tasks.editTask(editId.value, taskName.value, taskColor.value)
+	app.tasks.editTask(taskEditModal.id.value, taskName.value, taskColor.value)
 }
 
-watch(editId, onIdChange)
+watch(taskEditModal.id, onIdChange)
 </script>
 
 <template>
-	<BaseModal title="Edit Task" button-text="Edit" button-color="bg-green-500" v-model:active="editActive"
-		@submit="modalSubmit">
+	<BaseModal title="Edit Task" button-text="Edit" button-color="bg-green-600 hover:bg-green-500"
+		v-model:active="taskEditModal.active.value" @submit="modalSubmit">
 		<div class="flex flex-col w-full">
 			<label class="italic mb-1">Name</label>
 			<input class="border-b-2 border-b-white" type="text" v-model="taskName" />

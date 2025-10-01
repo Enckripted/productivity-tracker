@@ -49,14 +49,6 @@ describe('Supabase Goals Integration', () => {
 		expect(await supabaseGoals.getGoals()).toHaveLength(2)
 	})
 
-	it('Should mark a goal completed', async () => {
-		const orig = await supabaseGoals.createGoal(123, 3600, true)
-		await supabaseGoals.markGoalCompleted(orig.id)
-
-		const updated = (await supabaseGoals.getGoals()).find((g) => g.id === orig.id)
-		expect(updated?.completed).toBe(true)
-	})
-
 	it('Should delete a goal', async () => {
 		const orig = await supabaseGoals.createGoal(123, 3600, true)
 		await supabaseGoals.deleteGoal(orig.id)

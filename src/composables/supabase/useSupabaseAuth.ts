@@ -29,6 +29,7 @@ async function logout() {
 	const { error } = await supabase.auth.signOut()
 	//hack - sign out just doesnt work sometimes
 	localStorage.removeItem('sb-localhost-auth-token')
+	if (!error) location.reload()
 	return { error }
 }
 

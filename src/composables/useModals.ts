@@ -1,27 +1,27 @@
-import { ref } from 'vue'
+import { type Ref, ref } from 'vue'
 
-const editId = ref(-1)
-const editActive = ref(false)
-const deleteId = ref(-1)
-const deleteActive = ref(false)
+class Modal {
+	id: Ref<number>
+	active: Ref<boolean>
 
-function openEditModal(id: number) {
-	editId.value = id
-	editActive.value = true
+	constructor() {
+		this.id = ref(-1)
+		this.active = ref(false)
+	}
+
+	open(id: number) {
+		this.id.value = id
+		this.active.value = true
+	}
 }
 
-function openDeleteModal(id: number) {
-	deleteId.value = id
-	deleteActive.value = true
+const modals = {
+	taskEditModal: new Modal(),
+	taskDeleteModal: new Modal(),
+	goalEditModal: new Modal(),
+	goalDeleteModal: new Modal(),
 }
 
 export default function useModals() {
-	return {
-		editId,
-		editActive,
-		deleteId,
-		deleteActive,
-		openEditModal,
-		openDeleteModal,
-	}
+	return modals
 }

@@ -1,4 +1,4 @@
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import useTasks from './useTasks'
 import useGoals from './useGoals'
 import useSupabase from './supabase/useSupabase'
@@ -13,7 +13,26 @@ const { datesOnSameDay } = useHelperFunctions()
 
 const lastUpdate = ref(new Date())
 
+const userId = computed(() => {
+	return supabaseAuth.session.value?.user.id || '-1'
+})
+
 //supabase
+async function wipeData() {
+	await supabase.from('users').update({
+		last_update: new Date().toISOString(),
+		working_task: -1,
+		working_start: new Date().toISOString(),
+		day_running: false,
+		day_start: new Date().toISOString(),
+		goal_streak: 0,
+	})
+	await supabase.from('tasks').delete().eq('user_id', userId.value)
+	await supabase.from('goals').delete().eq('user_id', userId.value)
+
+	await tasks.createTask('Idling', '#008FFF')
+}
+
 async function getLastUpdate() {
 	const { data, error } = await supabase.from('users').select('last_update').single()
 	if (error) throw error
@@ -26,7 +45,7 @@ async function setLastUpdate(time: Date) {
 		.update({
 			last_update: time.toISOString(),
 		})
-		.eq('id', supabaseAuth.session.value?.user.id || '-1')
+		.eq('id', userId.value)
 		.select('last_update')
 		.single()
 	if (error) throw error
@@ -44,7 +63,6 @@ async function appStartEvent() {
 async function dayChangeEvent() {
 	if (goals.completedAllGoals()) await goals.incrementStreak()
 	else await goals.clearStreak()
-	await goals.clearGoalCompletions()
 
 	if (tasks.dayRunning) await tasks.endWorkday()
 
@@ -54,10 +72,6 @@ async function dayChangeEvent() {
 async function update() {
 	const now = new Date()
 
-	/*
-	if (goals.canCompleteGoal(tasks.workingTask.value))
-		await goals.completeGoal(tasks.workingTask.value)
-	*/
 	if (!datesOnSameDay(now, lastUpdate.value)) await dayChangeEvent()
 }
 
@@ -67,5 +81,6 @@ export default function useApp() {
 		goals,
 		appStartEvent,
 		update,
+		wipeData,
 	}
 }

@@ -8,7 +8,6 @@ const mockSupabase = vi.hoisted(() => ({
 	editGoal: vi.fn(),
 	deleteGoal: vi.fn(),
 	markGoalCompleted: vi.fn(),
-	clearGoalCompletions: vi.fn(),
 	updateGoalStreak: vi.fn(),
 }))
 vi.mock('@/composables/supabase/useSupabaseGoals', () => ({
@@ -83,12 +82,6 @@ describe('Goals unit test', () => {
 		expect(mockSupabase.deleteGoal).toHaveBeenCalledWith(baseGoal().id)
 	})
 
-	it('Should mark a goal completed', async () => {
-		await app.completeGoal(baseGoal().id)
-
-		expect(app.goalsList.value[0].completed).toBe(true)
-	})
-
 	it('Should check if a goal can be completed (for both goalUnderThreshold states)', async () => {
 		mockTasks.dayRunning.value = true
 		mockTasks.workingTask.value = baseGoal().taskId
@@ -107,20 +100,6 @@ describe('Goals unit test', () => {
 		expect(app.canCompleteGoal(baseGoal().id)).toBe(true)
 		mockTasks.findTaskWithId.mockReturnValue({ secondsWorked: 180 })
 		expect(app.canCompleteGoal(baseGoal().id)).toBe(false)
-	})
-
-	it('Should check if all goals are completed', async () => {
-		expect(app.completedAllGoals()).toBe(false)
-
-		await app.completeGoal(baseGoal().id)
-		expect(app.completedAllGoals()).toBe(true)
-	})
-
-	it('Should clear goal completions', async () => {
-		await app.completeGoal(baseGoal().id)
-		await app.clearGoalCompletions()
-
-		expect(app.goalsList.value[0].completed).toBe(false)
 	})
 
 	it('Should increment and clear streak', async () => {

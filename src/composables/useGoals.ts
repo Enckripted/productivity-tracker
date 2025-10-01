@@ -6,7 +6,7 @@ import useHelperFunctions from './useHelper'
 
 const tasks = useTasks()
 const supabaseApi = useSupabaseGoals()
-const { secsWorkedSince } = useHelperFunctions()
+const { now, secsWorkedBetween } = useHelperFunctions()
 
 const goalsList: Ref<Goal[]> = ref([])
 const streak = ref(0)
@@ -53,24 +53,19 @@ async function editGoal(
 async function deleteGoal(id: number) {
 	await supabaseApi.deleteGoal(id)
 	goalsList.value = goalsList.value.filter((goal) => goal.id !== id)
-	console.log('deleted')
-}
-
-async function completeGoal(id: number) {
-	await supabaseApi.markGoalCompleted(id)
-	getGoal(id).completed = true
 }
 
 function canCompleteGoal(id: number) {
-	if (!tasks.dayRunning.value) return false
+	const goal = getGoal(id)
 
-	const workingGoal = getGoal(id)
 	const timeWorked =
-		tasks.findTaskWithId(tasks.workingTask.value).secondsWorked +
-		secsWorkedSince(tasks.workingStart.value)
+		tasks.findTaskWithId(goal.taskId).secondsWorkedToday +
+		(goal.taskId === tasks.workingTask.value
+			? secsWorkedBetween(tasks.workingStart.value, now.value)
+			: 0)
 	if (
-		(workingGoal.goalUnderThreshold && timeWorked < workingGoal.secondsThreshold) ||
-		(!workingGoal.goalUnderThreshold && timeWorked >= workingGoal.secondsThreshold)
+		(goal.goalUnderThreshold && timeWorked < goal.secondsThreshold) ||
+		(!goal.goalUnderThreshold && timeWorked >= goal.secondsThreshold)
 	)
 		return true
 
@@ -80,16 +75,9 @@ function canCompleteGoal(id: number) {
 function completedAllGoals() {
 	let res = true
 	for (const goal of goalsList.value) {
-		res = res && goal.completed
+		res = res && canCompleteGoal(goal.id)
 	}
 	return res && goalsList.value.length > 0
-}
-
-async function clearGoalCompletions() {
-	await supabaseApi.clearGoalCompletions()
-	for (const goal of goalsList.value) {
-		goal.completed = false
-	}
 }
 
 async function incrementStreak() {
@@ -114,6 +102,8 @@ watch(tasks.taskList, async (cur, old) => {
 
 export default function useGoals() {
 	return {
+		goalExistsWithTask,
+		getGoal,
 		getGoalWithTask,
 		loadInitialState,
 		goalsList,
@@ -121,10 +111,8 @@ export default function useGoals() {
 		createGoal,
 		editGoal,
 		deleteGoal,
-		completeGoal,
 		canCompleteGoal,
 		completedAllGoals,
-		clearGoalCompletions,
 		incrementStreak,
 		clearStreak,
 	}

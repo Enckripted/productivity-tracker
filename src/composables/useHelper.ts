@@ -13,19 +13,19 @@ function secsBetweenDates(d1: Date, d2: Date) {
 	return Math.floor(Math.abs(d1.getTime() - d2.getTime()) / 1000)
 }
 
+function secsWorkedBetween(start: Date, end: Date) {
+	if (datesOnSameDay(start, end)) {
+		return secsBetweenDates(start, end)
+	} else {
+		return secsBetweenDates(start, getNextDay(start))
+	}
+}
+
 function getNextDay(from: Date) {
 	const next = new Date(from)
 	next.setDate(from.getDate() + 1)
 	next.setHours(0, 0, 0, 0)
 	return next
-}
-
-function secsWorkedSince(start: Date) {
-	if (datesOnSameDay(start, new Date())) {
-		return secsBetweenDates(start, new Date())
-	} else {
-		return secsBetweenDates(start, getNextDay(start))
-	}
 }
 
 function formatTimeSpent(timeInSecs: number) {
@@ -46,7 +46,7 @@ export default function useHelperFunctions() {
 		datesOnSameDay,
 		secsBetweenDates,
 		getNextDay,
-		secsWorkedSince,
+		secsWorkedBetween,
 		formatTimeSpent,
 	}
 }

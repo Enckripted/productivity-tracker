@@ -45,7 +45,6 @@ async function createGoal(taskId: number, secondsThreshold: number, goalUnderThr
 			task_id: taskId,
 			seconds_threshold: secondsThreshold,
 			goal_under_threshold: goalUnderThreshold,
-			completed: false,
 		})
 		.select()
 		.single()
@@ -80,19 +79,6 @@ async function deleteGoal(id: number) {
 	if (error) throw error
 }
 
-async function markGoalCompleted(id: number) {
-	const { error } = await supabase.from('goals').update({ completed: true }).eq('id', id)
-	if (error) throw error
-}
-
-async function clearGoalCompletions() {
-	const { error } = await supabase
-		.from('goals')
-		.update({ completed: false })
-		.eq('user_id', userId.value)
-	if (error) throw error
-}
-
 export default function useSupabaseGoals() {
 	return {
 		getGoalStreak,
@@ -101,7 +87,5 @@ export default function useSupabaseGoals() {
 		createGoal,
 		editGoal,
 		deleteGoal,
-		markGoalCompleted,
-		clearGoalCompletions,
 	}
 }

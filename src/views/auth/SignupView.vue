@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { ref, computed } from "vue"
-import useSupabaseAuth from '@/composables/supabase/useSupabaseAuth';
-
-import AuthLink from '@/components/auth/AuthLink.vue';
+import { ref, computed, watch } from "vue"
+import useSupabaseAuth from '@/composables/supabase/useSupabaseAuth'
+import AuthLink from '@/components/auth/AuthLink.vue'
+import router from "@/router"
 
 const supabaseAuth = useSupabaseAuth()
 
@@ -11,49 +11,62 @@ const password = ref("")
 
 const errorMsg = ref("")
 const submitting = ref(false)
-const success = ref(false)
 
 const buttonStyling = computed(() => [
-	"mt-2 p-0.5 px-3 text-black rounded-xs cursor-pointer",
-	submitting.value ? "bg-gray-600" : "bg-white"
+	"w-35 px-5 py-1 mt-3 rounded-md text-center text-lg text-white font-semibold whitespace-nowrap",
+	submitting.value
+		? "bg-gray-500 cursor-not-allowed"
+		: "bg-green-600 hover:bg-green-500 cursor-pointer"
 ])
 
 async function submitSignupForm() {
 	submitting.value = true
 	const { error } = await supabaseAuth.signup(email.value, password.value)
-
 	if (error) {
 		errorMsg.value = error.message
-		success.value = false
 	} else {
-		success.value = true
+		router.push("/")
 	}
 	submitting.value = false
 }
+
+watch(supabaseAuth.session, () => {
+	if (supabaseAuth.session)
+		location.reload()
+})
 </script>
 
 <template>
-	<div class="flex flex-col w-sm h-screen mx-auto justify-center gap-2">
-		<h1 class="text-4xl font-bold">Sign Up</h1>
+	<div class="flex flex-col items-center justify-center min-h-screen bg-zinc-950 text-white px-4">
+		<div class="flex flex-col w-full max-w-sm bg-zinc-900 rounded-lg shadow-lg p-6 gap-4">
+			<h1 class="text-2xl font-semibold text-center mb-2">Create an account</h1>
 
-		<form class="flex flex-col gap-0.5 items-start">
-			<div class="flex flex-col w-full">
-				<label>Email:</label>
-				<input class="w-full border-1 border-white rounded-xs" type="text" v-model="email" />
+			<form class="flex flex-col items-center gap-3" @submit.prevent="submitSignupForm">
+				<div class="flex flex-col w-full">
+					<input
+						class="w-full p-2 rounded-md bg-zinc-800 border border-zinc-700 text-white placeholder-gray-400"
+						type="email" v-model="email" placeholder="Email" />
+				</div>
+
+				<div class="flex flex-col w-full">
+					<input
+						class="w-full p-2 rounded-md bg-zinc-800 border border-zinc-700 text-white placeholder-gray-400"
+						type="password" v-model="password" placeholder="Password" />
+				</div>
+
+				<button :class="buttonStyling" type="submit">
+					{{ submitting ? "Signing Up..." : "Sign Up" }}
+				</button>
+			</form>
+
+			<p v-if="errorMsg" class="text-red-500 text-center mt-2">{{ errorMsg }}</p>
+
+			<div class="flex flex-col text-center text-sm text-gray-400 mt-3">
+				<p>
+					Already have an account?
+					<AuthLink to="/login">Log in</AuthLink>
+				</p>
 			</div>
-			<div class="flex flex-col w-full">
-				<label>Password:</label>
-				<input class="w-full border-1 border-white rounded-xs" type="password" v-model="password" />
-			</div>
-			<button :class="buttonStyling" @click.prevent="submitSignupForm">Sign Up</button>
-		</form>
-
-		<p v-if="success" class="text-green-600">An email to confirm your signup has been sent to {{ email }}</p>
-		<p v-else-if="errorMsg" class="text-red-600">{{ errorMsg }}</p>
-
-		<div>
-			<span>Already have an account? </span>
-			<AuthLink to="/login">Click here to log in.</AuthLink>
 		</div>
 	</div>
 </template>
